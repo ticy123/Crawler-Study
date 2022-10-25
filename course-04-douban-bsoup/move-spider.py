@@ -22,7 +22,7 @@ def parse_html(html):
         pic =item.find("a").find("img").get("src")
         dire= item.find("p").text.split("导演: ")[1].split("\xa0\xa0\xa0")[0]
         star = item.find(class_='rating_num').string
-        yield   {
+        yield {
             "rank":rank,
             "name":name,
             "pic":pic,

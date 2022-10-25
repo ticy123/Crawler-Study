@@ -5,11 +5,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
 driver = webdriver.Chrome()
-driver.get("https://www.baidu.com")
+driver.get("https://www.taobao.com")
 
 input = driver.find_element(By.ID,'kw')
 sleep(5)
-input.send_keys("测试")
+input.send_keys("善地")
 
 button = driver.find_element(By.ID,'su')
 button.click()
