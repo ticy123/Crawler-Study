@@ -1,1 +1,3 @@
 ﻿.idea
+*.xls
+common/__pycache__

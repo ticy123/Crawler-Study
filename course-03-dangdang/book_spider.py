@@ -1,5 +1,8 @@
 import requests
 import re
+
+from common.utils import timing
+
 pre_url = f"http://bang.dangdang.com/books/fivestars/01.00.00.00.00.00-recent30-0-0-1-"
 headers={
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
@@ -21,14 +24,14 @@ def parse_html(html):
 
     return re.finditer(pattern, html)
 
-
-def main(page):
-    url = f"{pre_url}{page}"
-    html = get_page_html(url)
-    items = parse_html(html)
-    for item in items:
-        print(f'{item.group("id")}  {item.group("pic")}')
+@timing
+def main(pages = 10):
+    for page in range(1, pages):
+        url = f"{pre_url}{page}"
+        html = get_page_html(url)
+        items = parse_html(html)
+        for item in items:
+            print(f'{item.group("id")}  {item.group("pic")}')
 
 if __name__ == '__main__':
-    for page in range(1,4):
-        main(page)
+    main()

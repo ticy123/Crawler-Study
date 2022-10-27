@@ -8,6 +8,8 @@ from selenium.webdriver.chrome.options import Options
 from retrying import retry
 import os
 # # 杀死进程
+from common.utils import timing
+
 os.system("taskkill /f /im chromedriver.exe")
 chrome_options = Options()
 chrome_options.add_argument('--headless')
@@ -115,10 +117,9 @@ class Brower:
 
 
 
-
 def main():
+    brower = Brower("java相关资源推荐",10)
     try:
-        brower = Brower("java相关资源推荐",10)
         pages = min((int(brower.get_all_pages()),brower.limit))
         brower.parse_html(pages)
         brower.save_to_excel()

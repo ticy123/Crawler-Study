@@ -1,12 +1,15 @@
+from multiprocessing import Pool, cpu_count
+
 import requests
 from bs4 import BeautifulSoup
 import xlwt
+from common.utils import timing
 
 def get_page_html(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
     }
-    with requests.get(url,headers=headers) as rep:
+    with requests.get(url,headers=headers,verify=False) as rep:
         try:
             if rep.status_code == 200:
                 return rep.text
@@ -15,7 +18,7 @@ def get_page_html(url):
 
 
 def parse_html(html):
-    move_list = BeautifulSoup(html,'lxml').find(class_= 'grid_view').find_all('li')
+    move_list = BeautifulSoup(html,'html.parser').find(class_='grid_view').find_all('li')
     for item in move_list:
         rank = item.find(class_="pic").find(class_="").string
         name = item.find(class_="title").string
@@ -46,21 +49,27 @@ def save_to_excel(items):
         sheet.write(row,2,item["pic"])
         sheet.write(row,3,item["dire"])
         sheet.write(row,4,item["star"])
-    book.save(u"豆瓣受欢迎的250部电影.xlsx")
+    book.save(u"豆瓣受欢迎的250部电影.xls")
 
 
-
-def main(page):
-    url = f"https://movie.douban.com/top250?start={page * 25}&filter="
+def main(url):
     html = get_page_html(url)
     items = parse_html(html)
     return items
-    # save_to_excel(items)
 
-
+@timing
+def proccessing(pages=10):
+    urls = []
+    movies = []
+    pool = Pool(cpu_count())
+    for page in range(pages):
+        url = f"https://movie.douban.com/top250?start={page * 25}&filter="
+        urls.append(url)
+    items = pool.map(main, urls)
+    movies.append(items)
+    save_to_excel(items)
+    pool.close()
+    pool.join()
 
 if __name__ == '__main__':
-    movies = []
-    for page in range(10):
-        movies += main(page)
-    save_to_excel(movies)
+    proccessing()
