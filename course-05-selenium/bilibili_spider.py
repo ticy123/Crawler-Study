@@ -116,7 +116,7 @@ class Brower:
         print("已全部保存为Excel,准备退出程序....")
 
 
-
+@timing
 def main():
     brower = Brower("java相关资源推荐",10)
     try:

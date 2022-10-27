@@ -1,3 +1,4 @@
+import sys
 from multiprocessing import Pool, cpu_count
 
 import requests
@@ -18,6 +19,9 @@ def get_page_html(url):
 
 
 def parse_html(html):
+    # python最大递归深度为1000,否则会报错,加此代码避免报错
+    sys.setrecursionlimit(1000000)
+    res =[]
     move_list = BeautifulSoup(html,'html.parser').find(class_='grid_view').find_all('li')
     for item in move_list:
         rank = item.find(class_="pic").find(class_="").string
@@ -25,14 +29,15 @@ def parse_html(html):
         pic =item.find("a").find("img").get("src")
         dire= item.find("p").text.split("导演: ")[1].split("\xa0\xa0\xa0")[0]
         star = item.find(class_='rating_num').string
-        yield {
+        print(f"爬取{name}电影信息...")
+        res.append({
             "rank":rank,
             "name":name,
             "pic":pic,
             "dire":dire,
             "star":star
-        }
-
+        })
+    return res
 
 def save_to_excel(items):
     book = xlwt.Workbook(encoding='utf-8',style_compression=0)
@@ -65,11 +70,18 @@ def proccessing(pages=10):
     for page in range(pages):
         url = f"https://movie.douban.com/top250?start={page * 25}&filter="
         urls.append(url)
-    items = pool.map(main, urls)
-    movies.append(items)
-    save_to_excel(items)
+    # 并行版本
+    items = pool.map_async(main, urls).get()
+    # 阻塞版本
+    # items = pool.map(main,urls)
+    for pageItem in items:
+        movies.extend(pageItem)
+    save_to_excel(movies)
     pool.close()
     pool.join()
+
+
+
 
 if __name__ == '__main__':
     proccessing()
